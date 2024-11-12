@@ -114,6 +114,13 @@
         <button onclick="loadGoogleSheetsData()"><i class="fas fa-sync icon"></i>Cargar desde Google Sheets</button>
     </div>
 
+    <!-- Campo de búsqueda -->
+    <div>
+        <label for="searchInput">Buscar por Código o Nombre:</label>
+        <input type="text" id="searchInput" placeholder="Ingrese código o nombre..." onkeyup="searchItem()">
+        <button onclick="clearSearch()">Limpiar Búsqueda</button>
+    </div>
+
     <table>
         <thead>
             <tr>
@@ -175,9 +182,34 @@
 
         function loadDataFromLocalStorage() {
             const data = JSON.parse(localStorage.getItem('inventoryData') || '[]');
-            data.forEach(item => {
-                addItemToTable(item.code, item.name, item.quantitySystem, item.quantityPhysical);
+            if (data.length > 0) {
+                data.forEach(item => {
+                    addItemToTable(item.code, item.name, item.quantitySystem, item.quantityPhysical);
+                });
+            }
+        }
+
+        // Búsqueda de artículos
+        function searchItem() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#itemList tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const code = cells[0].textContent.toLowerCase();
+                const name = cells[1].textContent.toLowerCase();
+                if (code.includes(searchTerm) || name.includes(searchTerm)) {
+                    row.style.display = ''; // Mostrar fila
+                } else {
+                    row.style.display = 'none'; // Ocultar fila
+                }
             });
+        }
+
+        // Limpiar la búsqueda
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            const rows = document.querySelectorAll('#itemList tr');
+            rows.forEach(row => row.style.display = ''); // Mostrar todas las filas
         }
 
         function importExcel() {
@@ -300,8 +332,7 @@
         }
 
         function clearTable() {
-            document.getElementById('itemList').innerHTML = '';
-            localStorage.removeItem('inventoryData');
+            document.getElementById('itemList').innerHTML = '';  // Limpia la tabla
         }
 
         async function loadGoogleSheetsData() {
